@@ -4,10 +4,10 @@ project(TinyDnn)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE "Debug")
 
-if (WIN32)
+if (MINGW)
     include_directories("/usr/local/include/eigen3/")
 elseif (UNIX)
     include_directories("/usr/local/include/eigen3/")
 endif ()
 
-add_executable(eigen main.cpp dnn.h dnn.cpp graph_manager.h graph_manager.cpp variable.h operator_bash.h)
+add_executable(eigen main.cpp variable.h variable.cpp full_connect.h full_connect.cpp operator_base.cpp operator_base.h graph_manager.h)
