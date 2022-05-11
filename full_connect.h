@@ -8,9 +8,17 @@
 */
 #ifndef TINYDNN__FULL_CONNECT_H
 #define TINYDNN__FULL_CONNECT_H
-#include "variable.h"
-#include "operator_base.h"
 #include <memory>
+#include <string>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/KroneckerProduct>
+#include <Eigen/Geometry>
+#include "operator_base.h"
+class OperatorBase;
+class Variable;
+class GraphManager;
+
 class FullConnect : public OperatorBase {
 public:
     static uint _instanceCount;/*记录有多少个FullConnect对象*/

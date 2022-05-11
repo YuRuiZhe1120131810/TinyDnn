@@ -6,8 +6,10 @@
  * 参数名 小写字母开头 所有字母小写 下划线分隔法
  * 普通变量名 小写字母开头 下划线结尾
 */
-#include "variable.h"
 #include <utility>
+#include "variable.h"
+#include "graph_manager.h"
+class GraphManager;
 
 Variable::Variable(const Eigen::MatrixXd &m,
                    std::string name,

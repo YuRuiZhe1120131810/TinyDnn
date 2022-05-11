@@ -10,4 +10,8 @@ elseif (UNIX)
     include_directories("/usr/local/include/eigen3/")
 endif ()
 
-add_executable(eigen main.cpp variable.h variable.cpp full_connect.h full_connect.cpp operator_base.cpp operator_base.h graph_manager.h)
+add_executable(eigen main.cpp
+        variable.h variable.cpp
+        full_connect.h full_connect.cpp
+        operator_base.cpp operator_base.h
+        graph_manager.h)

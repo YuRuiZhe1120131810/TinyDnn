@@ -14,8 +14,8 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 #include <Eigen/Geometry>
-#include "graph_manager.h"
 
+class GraphManager;
 class Variable {
     /*Variable是计算图的节点 可以被多个Operator调用 记录自身的值 最终loss对自身的梯度 调用Operator对自身的梯度
      * 汇集各调用Operator对自身的梯度后进行加和 作为自身最终的梯度*/

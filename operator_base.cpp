@@ -7,6 +7,8 @@
  * 普通变量名 小写字母开头 下划线结尾
 */
 #include "operator_base.h"
+#include "variable.h"
+class Variable;
 OperatorBase::OperatorBase(GraphManager &gm) : _graphManager{gm} {
     _gradientOfOutput.clear();
     _inputOutputPair.clear();

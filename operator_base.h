@@ -11,12 +11,14 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "variable.h"
-#include "graph_manager.h"
-
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/KroneckerProduct>
+#include <Eigen/Geometry>
 
 class Variable;
 class GraphManager;
+
 class OperatorBase {
     /*Operator是计算图的边 前馈计算输入输出是Variable 可以多次前馈计算 每次前馈计算会输出一个新Variable
      * 记录自身的参数 记录输入输出pair 反馈计算读取输出Variable的梯度 并计算赋值更新输入Variable的梯度*/

@@ -7,20 +7,26 @@
  * 普通变量名 小写字母开头 下划线结尾
  * 普通常量名 大写字母开头 下划线结尾
 */
-#include "full_connect.h"
 #include <utility>
 #include <algorithm>
+#include "full_connect.h"
+#include "operator_base.h"
+#include "variable.h"
+#include "graph_manager.h"
+class OperatorBase;
+class Variable;
+class GraphManager;
 
 FullConnect::FullConnect(uint64_t in_channel,
                          uint64_t out_channel,
                          double learning_rate,
                          std::string act_func,
                          GraphManager &graph_manager) : _act_func(std::move(act_func)),
-                                                              _learning_rate(learning_rate),
-                                                              _forwardCount(0),
-                                                              _weightAndBias(Eigen::MatrixXd::Random(in_channel,
-                                                                                                     out_channel)),
-                                                              OperatorBase(graph_manager) {
+                                                        _learning_rate(learning_rate),
+                                                        _forwardCount(0),
+                                                        _weightAndBias(Eigen::MatrixXd::Random(in_channel,
+                                                                                               out_channel)),
+                                                        OperatorBase(graph_manager) {
     _name = std::string("FullConnect_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
 
     _graphManager._operators.emplace(_name,
