@@ -28,10 +28,12 @@ public:
     std::vector<std::pair<std::string, std::string>> _inputOutputPair;
     /*图管理器 记录全体operator与variable的信息*/
     GraphManager &_graphManager;
-    OperatorBase(GraphManager &);
+    explicit OperatorBase(GraphManager &);
     virtual ~OperatorBase();
     /*每个operator还有自身参数 自身参数的梯度 前馈反馈的逻辑 由派生类实现*/
-    virtual Variable forward(Variable &input);
+    virtual Variable forward(Variable &v);
+    virtual Variable forward(Variable &v1,
+                             Variable &v2);
     virtual void backward();
     /*更新参数 载入参数 保存参数 初始化参数 如果layer没有参数可以不操作*/
     virtual void update();

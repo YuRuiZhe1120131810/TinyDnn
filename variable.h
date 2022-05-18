@@ -26,13 +26,16 @@ public:
     Eigen::MatrixXd _value;
     /*禁用拷贝构造，根据Variable构造另一个Variable是无意义的，构造计算图节点不应当依赖另一个节点*/
     Variable(const Variable &other) = delete;
-    explicit Variable(const Eigen::MatrixXd &m,
-                      std::string name,
-                      GraphManager &graph_manager);
     /*禁用拷贝赋值，拿Variable给已初始化的Variable赋值是无意义的，计算图节点不能覆盖另一个节点*/
     Variable &operator=(const Variable &other) = delete;
     /*移动赋值，用于临时变量保存结果*/
     Variable &operator=(Variable &&other) noexcept;
+    /*移动构造，因为没有拷贝构造*/
+    Variable(Variable &&other) noexcept;
+    /*普通构造函数*/
+    explicit Variable(const Eigen::MatrixXd &m,
+                      std::string name,
+                      GraphManager &graph_manager);
     ~Variable() = default;
     void reset();
     uint rows() const;

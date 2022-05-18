@@ -20,6 +20,16 @@ Variable::Variable(const Eigen::MatrixXd &m,
                                      std::shared_ptr<Variable>(this));
 }
 
+Variable::Variable(Variable &&other) noexcept {
+    std::swap(_value,
+              other._value);
+    std::swap(_gradientOfLoss,
+              other._gradientOfLoss);
+    std::swap(_gradientOfOperator,
+              other._gradientOfOperator);
+    other.reset();
+}
+
 void Variable::reset() {
     _value.resize(0,
                   0);

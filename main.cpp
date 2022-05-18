@@ -6,22 +6,22 @@
  * 参数名 小写字母开头 所有字母小写 下划线分隔法
  * 普通变量名 小写字母开头 下划线结尾
 */
+#include <iostream>
 #include "graph_manager.h"
 #include "variable.h"
-#include <iostream>
+#include "full_connect.h"
 
 int main(int argc,
          char **argv) {
     /*模拟训练数据准备*/
     const int data_cnt_ = 4;
     std::vector<double> pts_val_{0., 1., 0., 1., 0., 1., 1., 0.};
-    std::vector<double> label_val_{1., 1., 0., 0.};
-    const Eigen::MatrixXd pts_ = Eigen::MatrixXd::Map(&pts_val_[0],
-                                                      data_cnt_,
-                                                      2);
-    const Eigen::MatrixXd label_ = Eigen::MatrixXd::Map(&label_val_[0],
-                                                        data_cnt_,
-                                                        1);
-    std::cout << pts_ << std::endl;
+    std::vector<double> label_val_{1., 1., 0., 0., 0., 0., 1., 1.};
+    Eigen::MatrixXd pts_ = Eigen::MatrixXd::Map(&pts_val_[0],
+                                                data_cnt_,
+                                                2);
+    Eigen::MatrixXd label_ = Eigen::MatrixXd::Map(&label_val_[0],
+                                                  data_cnt_,
+                                                  2);
     std::cout << label_ << std::endl;
 }

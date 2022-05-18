@@ -17,7 +17,11 @@ OperatorBase::~OperatorBase() {
     _gradientOfOutput.clear();
     _inputOutputPair.clear();
 }
-Variable OperatorBase::forward(Variable &input) {
+Variable OperatorBase::forward(Variable &v) {
+    assert(false && "operator_base not inplement");
+}
+Variable OperatorBase::forward(Variable &v1,
+                               Variable &v2) {
     assert(false && "operator_base not inplement");
 }
 void OperatorBase::backward() {

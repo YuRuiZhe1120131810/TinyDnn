@@ -36,6 +36,4 @@ public:
     void backward() override;
 };
 
-uint FullConnect::_instanceCount{0};
-
 #endif //TINYDNN__FULL_CONNECT_H

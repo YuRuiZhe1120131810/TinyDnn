@@ -17,6 +17,8 @@ class OperatorBase;
 class Variable;
 class GraphManager;
 
+uint FullConnect::_instanceCount{0};
+
 FullConnect::FullConnect(uint64_t in_channel,
                          uint64_t out_channel,
                          double learning_rate,
@@ -24,11 +26,10 @@ FullConnect::FullConnect(uint64_t in_channel,
                          GraphManager &graph_manager) : _act_func(std::move(act_func)),
                                                         _learning_rate(learning_rate),
                                                         _forwardCount(0),
-                                                        _weightAndBias(Eigen::MatrixXd::Random(in_channel,
+                                                        _weightAndBias(Eigen::MatrixXd::Random(in_channel + 1,
                                                                                                out_channel)),
                                                         OperatorBase(graph_manager) {
     _name = std::string("FullConnect_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
-
     _graphManager._operators.emplace(_name,
                                      std::shared_ptr<OperatorBase>(this));
 }
@@ -190,6 +191,7 @@ Variable FullConnect::forward(Variable &input) {
             has_->second += grad_input_;/*如果一个Variable被同一layer多次前馈 梯度应该累加*/
         }
     }
+    return output_;
 }
 
 void FullConnect::backward() {
@@ -216,5 +218,4 @@ void FullConnect::backward() {
             grad_input_ += tmp_;
         }
     }
-
 }
