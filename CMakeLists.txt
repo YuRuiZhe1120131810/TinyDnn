@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE "Debug")
 
 if (MINGW)
-    include_directories("/usr/local/include/eigen3/")
+    include_directories("E:/Library/eigen-3.4.0")
 elseif (UNIX)
     include_directories("/usr/local/include/eigen3/")
 endif ()

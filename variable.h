@@ -38,8 +38,8 @@ public:
                       GraphManager &graph_manager);
     ~Variable() = default;
     void reset();
-    uint rows() const;
-    uint cols() const;
+    uint32_t rows() const;
+    uint32_t cols() const;
     Eigen::MatrixXd val() const;
 };
 #endif //EIGEN__VARIABLE_H

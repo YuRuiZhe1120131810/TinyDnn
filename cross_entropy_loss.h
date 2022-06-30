@@ -14,12 +14,12 @@ class OperatorBase;
 class Variable;
 class GraphManager;
 class CrossEntropyLoss : public OperatorBase {
-    static uint _instanceCount;/*记录有多少个CrossEntropyLoss对象*/
-    uint _forwardCount;/*记录forward次数*/
+    static uint32_t _instanceCount;/*记录有多少个CrossEntropyLoss对象*/
+    uint32_t _forwardCount;/*记录forward次数*/
     explicit CrossEntropyLoss(GraphManager &graph_manager);
     Variable forward(Variable &prediction,
                      Variable &label) override;
     void backward() override;
 };
-uint CrossEntropyLoss::_instanceCount{0};
+uint32_t CrossEntropyLoss::_instanceCount{0};
 #endif //TINYDNN__CROSS_ENTROPY_LOSS_H

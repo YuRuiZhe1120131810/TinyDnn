@@ -21,8 +21,8 @@ class GraphManager;
 
 class FullConnect : public OperatorBase {
 public:
-    static uint _instanceCount;/*记录有多少个FullConnect对象*/
-    uint _forwardCount;/*记录forward次数*/
+    static uint32_t _instanceCount;/*记录有多少个FullConnect对象*/
+    uint32_t _forwardCount;/*记录forward次数*/
     Eigen::MatrixXd _weightAndBias;/*参数*/
     Eigen::MatrixXd _gradWeightAndBias;/*参数的梯度*/
     double _learning_rate;/*学习率*/

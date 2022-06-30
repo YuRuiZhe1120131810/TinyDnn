@@ -24,4 +24,5 @@ int main(int argc,
                                                   data_cnt_,
                                                   2);
     std::cout << label_ << std::endl;
+
 }

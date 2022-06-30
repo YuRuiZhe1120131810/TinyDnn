@@ -51,11 +51,11 @@ Variable &Variable::operator=(Variable &&other) noexcept {
     return *this;
 }
 
-uint Variable::rows() const {
+uint32_t Variable::rows() const {
     return _value.rows();
 }
 
-uint Variable::cols() const {
+uint32_t Variable::cols() const {
     return _value.cols();
 }
 

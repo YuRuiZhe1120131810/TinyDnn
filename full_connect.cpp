@@ -17,7 +17,7 @@ class OperatorBase;
 class Variable;
 class GraphManager;
 
-uint FullConnect::_instanceCount{0};
+uint32_t FullConnect::_instanceCount{0};
 
 FullConnect::FullConnect(uint64_t in_channel,
                          uint64_t out_channel,
@@ -103,8 +103,8 @@ Variable FullConnect::forward(Variable &input) {
         }
         Eigen::MatrixXd grad_softmax_ = Eigen::MatrixXd::Zero(output_.rows() * output_.cols(),
                                                               output_.rows() * output_.cols());
-        for (uint h_ = 0; h_ < output_.cols(); ++h_) {
-            for (uint v_ = 0; v_ < output_.cols(); ++v_) {
+        for (uint32_t h_ = 0; h_ < output_.cols(); ++h_) {
+            for (uint32_t v_ = 0; v_ < output_.cols(); ++v_) {
                 std::vector<double> to_diag_;
                 to_diag_.reserve(output_.rows());
                 for_each(blocks_.cbegin(),
