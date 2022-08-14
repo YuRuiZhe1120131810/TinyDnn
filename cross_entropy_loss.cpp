@@ -11,9 +11,14 @@
 #include "operator_base.h"
 #include "variable.h"
 #include "graph_manager.h"
+
 class OperatorBase;
+
 class Variable;
+
 class GraphManager;
+
+uint32_t CrossEntropyLoss::_instanceCount{0};
 
 CrossEntropyLoss::CrossEntropyLoss(GraphManager &graph_manager) : _forwardCount(0),
                                                                   OperatorBase(graph_manager) {
@@ -26,7 +31,7 @@ Variable CrossEntropyLoss::forward(Variable &prediction,
                                    Variable &label) {
     assert(prediction.cols() == label.cols() && prediction.rows() == label.rows());
     assert(0 < prediction._value.minCoeff() && prediction._value.maxCoeff() <= 1 && 0 <= label._value.minCoeff()
-               && label._value.maxCoeff() <= 1);
+           && label._value.maxCoeff() <= 1);
     /*计算loss=sum[-label*ln(prediction)]*/
     const Eigen::MatrixXd tmp_ = -label._value.array() * prediction._value.array().log();
     const Eigen::MatrixXd a_ = Eigen::MatrixXd::Ones(1,
@@ -45,15 +50,15 @@ Variable CrossEntropyLoss::forward(Variable &prediction,
                                                  output_._name));
     _inputOutputPair.emplace_back(std::make_pair(label._name,
                                                  output_._name));
-    auto as_diag_ = [](Eigen::MatrixXd x)->Eigen::MatrixXd {
+    auto as_diag_ = [](Eigen::MatrixXd x) -> Eigen::MatrixXd {
         return Eigen::VectorXd::Map(x.data(),
                                     x.size()).asDiagonal().toDenseMatrix();
     };;
     /*输出loss对prediction的梯度*/
     Eigen::MatrixXd grad_prediction_ = as_diag_(prediction._value.cwiseInverse().eval())
-        * label._value.asDiagonal().toDenseMatrix()
-        * kroneckerProduct(b_.transpose(),
-                           a_).transpose().eval();
+                                       * label._value.asDiagonal().toDenseMatrix()
+                                       * kroneckerProduct(b_.transpose(),
+                                                          a_).transpose().eval();
     auto has_ = prediction._gradientOfOperator.find(_name);
     if (has_ == prediction._gradientOfOperator.end()) {
         prediction._gradientOfOperator.emplace(_name,
@@ -64,8 +69,8 @@ Variable CrossEntropyLoss::forward(Variable &prediction,
     }
     /*输出loss对label的梯度*/
     Eigen::MatrixXd grad_label_ = as_diag_(prediction._value.array().log().eval())
-        * kroneckerProduct(b_.transpose(),
-                           a_).transpose().eval();
+                                  * kroneckerProduct(b_.transpose(),
+                                                     a_).transpose().eval();
     has_ = label._gradientOfOperator.find(_name);
     if (has_ == label._gradientOfOperator.end()) {
         label._gradientOfOperator.emplace(_name,
@@ -86,7 +91,7 @@ void CrossEntropyLoss::backward() {
         /*loss对x的梯度 = z对x的梯度 * loss对z的梯度*/
         const auto &input_name_{ele.first};
         const Eigen::MatrixXd tmp_ = _graphManager._variables[input_name_]->_gradientOfOperator[_name]
-            * grad_loss_to_output_;
+                                     * grad_loss_to_output_;
         auto &grad_input_ = _graphManager._variables[input_name_]->_gradientOfLoss;
         if (grad_input_.size() == 0) {
             grad_input_ = tmp_;

@@ -36,7 +36,6 @@ public:
         static GraphManager instance;
         return instance;
     }
-private:
     GraphManager() {
         _operators.clear();
         _variableCallBy.clear();
