@@ -9,6 +9,7 @@
 */
 #ifndef TINYDNN__CROSS_ENTROPY_LOSS_H
 #define TINYDNN__CROSS_ENTROPY_LOSS_H
+#include <iostream>
 #include "operator_base.h"
 class OperatorBase;
 class Variable;
@@ -21,6 +22,7 @@ public:
     Variable forward(Variable &prediction,
                      Variable &label) override;
     void backward() override;
+    void update() override {};
 };
 
 #endif //TINYDNN__CROSS_ENTROPY_LOSS_H

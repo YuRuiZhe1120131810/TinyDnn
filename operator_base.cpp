@@ -37,4 +37,3 @@ bool OperatorBase::saveWeight() {
 void OperatorBase::initWeight(uint64_t seed) {
     assert(false && "operator_base not inplement");
 }
-

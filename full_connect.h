@@ -39,6 +39,7 @@ public:
                          GraphManager &graph_manager);
     Variable forward(Variable &input) override;
     void backward() override;
+    void update() override;
 };
 
 #endif //TINYDNN__FULL_CONNECT_H

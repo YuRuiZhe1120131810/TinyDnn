@@ -33,7 +33,7 @@ FullConnect::FullConnect(uint64_t in_channel,
                                                         OperatorBase(graph_manager) {
     _name = std::string("FullConnect_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
     _graphManager._operators.emplace(_name,
-                                     std::shared_ptr<OperatorBase>(this));
+                                     std::shared_ptr<FullConnect>(this));
 }
 
 Variable FullConnect::forward(Variable &input) {
@@ -209,7 +209,7 @@ Variable FullConnect::forward(Variable &input) {
         /*z对w的梯度 = y对w的梯度*/
         _wGradOfOutput.emplace(output_._name,
                                grad_w_);
-        /*z对bias的梯度 = y对bias的梯度 * z对y的梯度*/
+        /*z对bias的梯度 = y对bias的梯度*/
         _bGradOfOutput.emplace(output_._name,
                                Eigen::MatrixXd::Identity(output_.rows() * output_.cols(),
                                                          output_.rows() * output_.cols()));
@@ -233,6 +233,8 @@ void FullConnect::backward() {
         const auto &grad_loss_to_output_{_graphManager._variables.at(output_name_)->_gradientOfLoss};
         /*loss对w的梯度 = z对w的梯度 * loss对z的梯度*/
         Eigen::MatrixXd tmp_ = _wGradOfOutput.at(output_name_) * grad_loss_to_output_;
+        tmp_ = tmp_.reshaped(_weight.rows(),
+                             _weight.cols());
         if (_gradWeight.size() == 0) {
             _gradWeight = tmp_;
         }
@@ -241,8 +243,10 @@ void FullConnect::backward() {
         }
         /*loss对b的梯度 = z对bias的梯度 * loss对z的梯度*/
         tmp_ = _bGradOfOutput.at(output_name_) * grad_loss_to_output_;
-        /*bias是一个只有1行的向量 前馈时复制自身 反馈时把梯度累加成一个1行向量*/
-        tmp_ = tmp_.colwise().sum();
+        /*bias是一个只有1行的向量 前馈时复制自身 反馈时调整形状使bias_grad的column=bias的column
+         * 最后累加成一个1行向量*/
+        tmp_ = tmp_.reshaped(tmp_.rows() / _bias.cols(),
+                             _bias.cols()).colwise().sum();
         if (_gradBias.size() == 0) {
             _gradBias = tmp_;
         }
@@ -252,12 +256,24 @@ void FullConnect::backward() {
         /*loss对x的梯度 = z对x的梯度 * loss对z的梯度*/
         const auto &input_name_{ele.first};
         tmp_ = _graphManager._variables.at(input_name_)->_gradientOfOperator.at(_name) * grad_loss_to_output_;
-        auto &grad_input_ = _graphManager._variables[input_name_]->_gradientOfLoss;
-        if (grad_input_.size() == 0) {
-            grad_input_ = tmp_;
+        tmp_ = tmp_.reshaped(_graphManager._variables[input_name_]->rows(),
+                             _graphManager._variables[input_name_]->cols());
+        auto &grad_loss_to_input_ = _graphManager._variables[input_name_]->_gradientOfLoss;
+        if (grad_loss_to_input_.size() == 0) {
+            grad_loss_to_input_ = tmp_;
         }
         else {
-            grad_input_ += tmp_;
+            grad_loss_to_input_ += tmp_;
         }
+        std::cout << "aaaaa" << std::endl << _graphManager._variables[input_name_]->_gradientOfLoss << std::endl;
     }
+}
+
+void FullConnect::update() {
+    std::cout << "layer=" << _name << ",_weight=" << std::endl << _weight << std::endl
+              << "_gradWeight=" << std::endl << _gradWeight << std::endl;
+    std::cout << "layer=" << _name << ",_bias=" << std::endl << _bias << std::endl
+              << "_gradBias=" << std::endl << _gradBias << std::endl;
+    _weight += _gradWeight * _learning_rate;
+    _bias += _gradBias * _learning_rate;
 }

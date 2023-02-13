@@ -23,6 +23,8 @@ class GraphManager {
      * Variable被Operator输出 Variable.name为key value是Operator.name
      * Variable与Operator被记录在map里 方便查找
      * 使用单例模式 全局唯一*/
+private:
+    static GraphManager _instance;
 public:
     std::unordered_map<std::string, std::shared_ptr<OperatorBase>> _operators;
     std::unordered_map<std::string, std::vector<std::string>> _variableCallBy;
@@ -37,8 +39,7 @@ public:
     GraphManager(const GraphManager &) = delete;
     GraphManager &operator=(const GraphManager &) = delete;
     static GraphManager &get() {
-        static GraphManager instance;
-        return instance;
+        return _instance;
     }
     GraphManager() {
         _operators.clear();
@@ -47,6 +48,7 @@ public:
         _variables.clear();
     }
     void backward(Variable &);
+    void update();
 };
 
 #endif //TINYDNN__GRAPH_MANAGER_H
