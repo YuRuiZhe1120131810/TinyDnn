@@ -14,6 +14,7 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 #include <Eigen/Geometry>
+#include <iostream>
 #include "operator_base.h"
 class OperatorBase;
 class Variable;
@@ -23,8 +24,12 @@ class FullConnect : public OperatorBase {
 public:
     static uint32_t _instanceCount;/*记录有多少个FullConnect对象*/
     uint32_t _forwardCount;/*记录forward次数*/
-    Eigen::MatrixXd _weightAndBias;/*参数*/
-    Eigen::MatrixXd _gradWeightAndBias;/*参数的梯度*/
+    Eigen::MatrixXd _weight;/*行=输入维 列=输出维*/
+    Eigen::MatrixXd _bias;/*行=1 列=输出维*/
+    std::unordered_map<std::string, Eigen::MatrixXd> _wGradOfOutput;/*每次前馈记录梯度*/
+    std::unordered_map<std::string, Eigen::MatrixXd> _bGradOfOutput;/*每次前馈记录梯度*/
+    Eigen::MatrixXd _gradWeight;/*反馈汇总梯度*/
+    Eigen::MatrixXd _gradBias;/*反馈汇总梯度*/
     double _learning_rate;/*学习率*/
     std::string _act_func;/*激活函数*/
     explicit FullConnect(uint64_t in_channel,

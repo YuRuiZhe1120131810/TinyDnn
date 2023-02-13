@@ -24,7 +24,6 @@ class OperatorBase {
      * 记录自身的参数 记录输入输出pair 反馈计算读取输出Variable的梯度 并计算赋值更新输入Variable的梯度*/
 public:
     std::string _name;
-    std::unordered_map<std::string, Eigen::MatrixXd> _gradientOfOutput;
     std::vector<std::pair<std::string, std::string>> _inputOutputPair;
     /*图管理器 记录全体operator与variable的信息*/
     GraphManager &_graphManager;

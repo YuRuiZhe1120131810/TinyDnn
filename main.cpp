@@ -24,13 +24,32 @@ int main(int argc,
     Eigen::MatrixXd label_ = Eigen::MatrixXd::Map(&label_val_[0],
                                                   data_cnt_,
                                                   data_dim_);
-    std::cout << "label:\n" << label_ << std::endl << "pts:\n" << pts_ << std::endl;
-    GraphManager graph_manager_;
-    Variable pts_var_(pts_, std::string("train_data"), graph_manager_);
-    Variable label_var_(label_, std::string("train_label"), graph_manager_);
+//    std::cout << "label:\n" << label_ << std::endl << "pts:\n" << pts_ << std::endl;
+    Variable pts_var_(pts_,
+                      std::string("train_data"),
+                      GraphManager::get());
+    Variable label_var_(label_,
+                        std::string("train_label"),
+                        GraphManager::get());
     /*网络层定义*/
-    FullConnect layer_0_(data_dim_, 3, 1e-5, std::string("relu"), graph_manager_);
-    FullConnect layer_1_(3, data_dim_, 1e-5, std::string("softmax"), graph_manager_);
-    CrossEntropyLoss layer_2(graph_manager_);
+    FullConnect layer_0_(data_dim_,
+                         3,
+                         1e-5,
+                         std::string(""),
+                         GraphManager::get());
+    FullConnect layer_1_(3,
+                         data_dim_,
+                         1e-5,
+                         std::string("softmax"),
+                         GraphManager::get());
+    CrossEntropyLoss layer_2_(GraphManager::get());
     /*前馈*/
+    Variable x = layer_0_.forward(pts_var_);
+    Variable y = layer_1_.forward(x);
+    Variable loss_ = layer_2_.forward(y,
+                                      label_var_);
+    /*反馈*/
+    GraphManager::get().backward(loss_);
+    std::cout << "main() exit" << std::endl;
+    return 0;
 }

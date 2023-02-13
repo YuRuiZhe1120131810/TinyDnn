@@ -14,5 +14,5 @@ add_executable(eigen main.cpp
         variable.h variable.cpp
         full_connect.h full_connect.cpp
         operator_base.cpp operator_base.h
-        graph_manager.h
+        graph_manager.h graph_manager.cpp
         cross_entropy_loss.cpp cross_entropy_loss.h)

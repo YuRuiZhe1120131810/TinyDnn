@@ -10,11 +10,9 @@
 #include "variable.h"
 class Variable;
 OperatorBase::OperatorBase(GraphManager &gm) : _graphManager{gm} {
-    _gradientOfOutput.clear();
     _inputOutputPair.clear();
 }
 OperatorBase::~OperatorBase() {
-    _gradientOfOutput.clear();
     _inputOutputPair.clear();
 }
 Variable OperatorBase::forward(Variable &v) {

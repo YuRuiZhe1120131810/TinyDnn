@@ -7,6 +7,7 @@
  * 普通变量名 小写字母开头 下划线结尾
 */
 #include <utility>
+#include <iostream>
 #include "variable.h"
 #include "graph_manager.h"
 class GraphManager;
@@ -28,6 +29,10 @@ Variable::Variable(Variable &&other) noexcept {
     std::swap(_gradientOfOperator,
               other._gradientOfOperator);
     other.reset();
+}
+
+Variable::~Variable() {
+    reset();
 }
 
 void Variable::reset() {

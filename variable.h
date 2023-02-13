@@ -21,9 +21,9 @@ class Variable {
      * 汇集各调用Operator对自身的梯度后进行加和 作为自身最终的梯度*/
 public:
     std::string _name;
-    std::unordered_map<std::string, Eigen::MatrixXd> _gradientOfOperator;
-    Eigen::MatrixXd _gradientOfLoss;
-    Eigen::MatrixXd _value;
+    std::unordered_map<std::string, Eigen::MatrixXd> _gradientOfOperator;/*主调Operator对自身的梯度*/
+    Eigen::MatrixXd _gradientOfLoss; /*最终loss对自身的梯度*/
+    Eigen::MatrixXd _value; /*记录自身的值*/
     /*禁用拷贝构造，根据Variable构造另一个Variable是无意义的，构造计算图节点不应当依赖另一个节点*/
     Variable(const Variable &other) = delete;
     /*禁用拷贝赋值，拿Variable给已初始化的Variable赋值是无意义的，计算图节点不能覆盖另一个节点*/
@@ -36,7 +36,7 @@ public:
     explicit Variable(const Eigen::MatrixXd &m,
                       std::string name,
                       GraphManager &graph_manager);
-    ~Variable() = default;
+    ~Variable();
     void reset();
     uint32_t rows() const;
     uint32_t cols() const;

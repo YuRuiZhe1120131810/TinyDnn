@@ -28,8 +28,12 @@ public:
     std::unordered_map<std::string, std::vector<std::string>> _variableCallBy;
     std::unordered_map<std::string, std::string> _variableCreateBy;
     std::unordered_map<std::string, std::shared_ptr<Variable>> _variables;
-
-    ~GraphManager() = default;
+    ~GraphManager() {
+        _operators.clear();
+        _variableCallBy.clear();
+        _variableCreateBy.clear();
+        _variables.clear();
+    };
     GraphManager(const GraphManager &) = delete;
     GraphManager &operator=(const GraphManager &) = delete;
     static GraphManager &get() {
@@ -42,6 +46,7 @@ public:
         _variableCreateBy.clear();
         _variables.clear();
     }
+    void backward(Variable &);
 };
 
 #endif //TINYDNN__GRAPH_MANAGER_H
