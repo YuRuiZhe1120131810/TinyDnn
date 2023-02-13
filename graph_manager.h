@@ -24,7 +24,7 @@ class GraphManager {
      * Variable与Operator被记录在map里 方便查找
      * 使用单例模式 全局唯一*/
 private:
-    static GraphManager _instance;
+
 public:
     std::unordered_map<std::string, std::shared_ptr<OperatorBase>> _operators;
     std::unordered_map<std::string, std::vector<std::string>> _variableCallBy;
@@ -39,7 +39,8 @@ public:
     GraphManager(const GraphManager &) = delete;
     GraphManager &operator=(const GraphManager &) = delete;
     static GraphManager &get() {
-        return _instance;
+        thread_local static GraphManager instance_;
+        return instance_;
     }
     GraphManager() {
         _operators.clear();

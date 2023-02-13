@@ -265,15 +265,10 @@ void FullConnect::backward() {
         else {
             grad_loss_to_input_ += tmp_;
         }
-        std::cout << "aaaaa" << std::endl << _graphManager._variables[input_name_]->_gradientOfLoss << std::endl;
     }
 }
 
 void FullConnect::update() {
-    std::cout << "layer=" << _name << ",_weight=" << std::endl << _weight << std::endl
-              << "_gradWeight=" << std::endl << _gradWeight << std::endl;
-    std::cout << "layer=" << _name << ",_bias=" << std::endl << _bias << std::endl
-              << "_gradBias=" << std::endl << _gradBias << std::endl;
     _weight += _gradWeight * _learning_rate;
     _bias += _gradBias * _learning_rate;
 }

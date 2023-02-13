@@ -13,8 +13,6 @@
 #include <list>
 #include <iostream>
 
-GraphManager GraphManager::_instance;
-
 void GraphManager::backward(Variable &start) {
     /*从loss节点开始BFS遍历 要求graph是树形结构 把loss节点的梯度回传给所有Operator和Variable*/
     std::queue<std::string> fifo_;
