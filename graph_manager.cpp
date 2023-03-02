@@ -25,7 +25,7 @@ void GraphManager::backward(Variable &start) {
             std::cout << "是叶子节点,continue" << std::endl;
             continue;
         }
-        std::cout << "被Operator=" << iter->second << "调用" << std::endl;
+        std::cout << "由Operator=" << iter->second << "生成" << std::endl;
         std::shared_ptr<OperatorBase> &invoke_op_ = _operators.at(iter->second);
         invoke_op_->backward();
         for (const auto &io_var_name_ :invoke_op_->_inputOutputPair) {

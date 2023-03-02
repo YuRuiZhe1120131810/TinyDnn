@@ -57,14 +57,14 @@ Variable FullConnect::forward(Variable &input) {
     /*y对w的梯度*/
     Eigen::MatrixXd identity_ = Eigen::MatrixXd::Identity(_weight.cols(),
                                                           _weight.cols());
-    Eigen::MatrixXd grad_w_ = kroneckerProduct(identity_,
-                                               input.val().transpose()).eval();
+    Eigen::MatrixXd grad_w_ = kroneckerProduct(input.val().transpose(),
+                                               identity_).eval();
     std::cout << "layer=" << _name << ",y对w的梯度" << grad_w_.rows() << "行" << grad_w_.cols() << "列" << std::endl;
     /*y对x的梯度*/
     identity_ = Eigen::MatrixXd::Identity(input.rows(),
                                           input.rows());
-    Eigen::MatrixXd grad_input_ = kroneckerProduct(_weight,
-                                                   identity_).eval();
+    Eigen::MatrixXd grad_input_ = kroneckerProduct(identity_,
+                                                   _weight).eval();
     std::cout << "layer=" << _name << ",y对x的梯度" << grad_input_.rows() << "行" << grad_input_.cols() << "列" << std::endl;
     /*y对bias的梯度恒为1 但是随着input的行数变化 bias的梯度的行数也在变化 可能需要把梯度累加到一行 导致梯度更新不准*/
     auto sigmoid = [&](const Eigen::MatrixXd &x)->Eigen::MatrixXd { return 1 / ((-x).array().exp() + 1); };
@@ -233,8 +233,6 @@ void FullConnect::backward() {
         const auto &grad_loss_to_output_{_graphManager._variables.at(output_name_)->_gradientOfLoss};
         /*loss对w的梯度 = z对w的梯度 * loss对z的梯度*/
         Eigen::MatrixXd tmp_ = _wGradOfOutput.at(output_name_) * grad_loss_to_output_;
-        tmp_ = tmp_.reshaped(_weight.rows(),
-                             _weight.cols());
         if (_gradWeight.size() == 0) {
             _gradWeight = tmp_;
         }
@@ -243,10 +241,6 @@ void FullConnect::backward() {
         }
         /*loss对b的梯度 = z对bias的梯度 * loss对z的梯度*/
         tmp_ = _bGradOfOutput.at(output_name_) * grad_loss_to_output_;
-        /*bias是一个只有1行的向量 前馈时复制自身 反馈时调整形状使bias_grad的column=bias的column
-         * 最后累加成一个1行向量*/
-        tmp_ = tmp_.reshaped(tmp_.rows() / _bias.cols(),
-                             _bias.cols()).colwise().sum();
         if (_gradBias.size() == 0) {
             _gradBias = tmp_;
         }
@@ -256,19 +250,21 @@ void FullConnect::backward() {
         /*loss对x的梯度 = z对x的梯度 * loss对z的梯度*/
         const auto &input_name_{ele.first};
         tmp_ = _graphManager._variables.at(input_name_)->_gradientOfOperator.at(_name) * grad_loss_to_output_;
-        tmp_ = tmp_.reshaped(_graphManager._variables[input_name_]->rows(),
-                             _graphManager._variables[input_name_]->cols());
-        auto &grad_loss_to_input_ = _graphManager._variables[input_name_]->_gradientOfLoss;
+        auto &grad_loss_to_input_ = _graphManager._variables.at(input_name_)->_gradientOfLoss;
         if (grad_loss_to_input_.size() == 0) {
-            grad_loss_to_input_ = tmp_;
+            _graphManager._variables.at(input_name_)->_gradientOfLoss = tmp_;
         }
         else {
-            grad_loss_to_input_ += tmp_;
+            _graphManager._variables.at(input_name_)->_gradientOfLoss += tmp_;
         }
     }
 }
 
 void FullConnect::update() {
-    _weight += _gradWeight * _learning_rate;
-    _bias += _gradBias * _learning_rate;
+    /*_gradWeight通过矩阵相乘得到 定义符合 ∂F/∂X = ∂Y/∂x * ∂F/∂Y  ∂F/∂X 的形状和 X 并不一定相同*/
+    _weight += _gradWeight.reshaped(_weight.rows(),
+                                    _weight.cols()) * _learning_rate;
+    /*bias是一个只有1行的向量 前馈时复制自身 反馈时调整形状使bias_grad的column=bias的column 最后累加成一个1行向量 */
+    _bias += _gradBias.reshaped(_gradBias.rows() / _bias.cols(),
+                                _bias.cols()).colwise().sum() * _learning_rate;
 }

@@ -33,20 +33,20 @@ int main(int argc,
                         GraphManager::get());
     /*网络层定义*/
     FullConnect layer_0_(data_dim_,
-                         data_dim_,
+                         3,
                          1e-5,
                          std::string(""),
                          GraphManager::get());
-//    FullConnect layer_1_(3,
-//                         data_dim_,
-//                         1e-5,
-//                         std::string("softmax"),
-//                         GraphManager::get());
+    FullConnect layer_1_(3,
+                         data_dim_,
+                         1e-5,
+                         std::string("softmax"),
+                         GraphManager::get());
     CrossEntropyLoss layer_2_(GraphManager::get());
     /*前馈*/
     Variable x = layer_0_.forward(pts_var_);
-//    Variable y = layer_1_.forward(x);
-    Variable loss_ = layer_2_.forward(x,
+    Variable y = layer_1_.forward(x);
+    Variable loss_ = layer_2_.forward(y,
                                       label_var_);
     /*反馈*/
     GraphManager::get().backward(loss_);
