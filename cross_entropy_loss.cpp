@@ -32,7 +32,8 @@ Variable CrossEntropyLoss::forward(Variable &prediction,
     /*计算loss=sum[-label*ln(prediction)]*/
     const double result_ = (-label._value.array() * prediction._value.array().log()).sum();
     auto output_ = Variable(Eigen::Matrix<double, 1, 1>(result_),
-                            _name + "_" + std::to_string(_forwardCount++));
+                            _name + "_" + std::to_string(_forwardCount++),
+                            _graphManager);
     output_._gradientOfLoss = Eigen::Matrix<double, 1, 1>(1.0);
     /*填充节点连接关系*/
     _graphManager._variableCreateBy.emplace(output_._name,

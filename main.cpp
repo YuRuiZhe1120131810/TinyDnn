@@ -24,12 +24,18 @@ int main(int argc,
     Eigen::MatrixXd label_ = Eigen::MatrixXd::Map(&label_val_[0],
                                                   data_cnt_,
                                                   data_dim_);
-    //std::cout << "label:\n" << label_ << std::endl << "pts:\n" << pts_ << std::endl;
+//    std::cout << "label:\n" << label_ << std::endl << "pts:\n" << pts_ << std::endl;
+    Variable pts_var_(pts_,
+                      std::string("train_data"),
+                      GraphManager::get());
+    Variable label_var_(label_,
+                        std::string("train_label"),
+                        GraphManager::get());
     /*网络层定义*/
     FullConnect layer_0_(data_dim_,
                          3,
                          1e-5,
-                         std::string("relu"),
+                         std::string(""),
                          GraphManager::get());
     FullConnect layer_1_(3,
                          data_dim_,
@@ -37,11 +43,6 @@ int main(int argc,
                          std::string("softmax"),
                          GraphManager::get());
     CrossEntropyLoss layer_2_(GraphManager::get());
-    /*训练样本与标签*/
-    Variable pts_var_(pts_,
-                      std::string("train_data"));
-    Variable label_var_(label_,
-                        std::string("train_label"));
     /*前馈*/
     Variable x = layer_0_.forward(pts_var_);
     Variable y = layer_1_.forward(x);
@@ -51,8 +52,6 @@ int main(int argc,
     GraphManager::get().backward(loss_);
     /*用梯度更新参数*/
     GraphManager::get().update();
-    /*清除Variable后才重新前馈生成新计算图*/
-    GraphManager::get().clearVariable();
     std::cout << "main() exit" << std::endl;
     return 0;
 }

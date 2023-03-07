@@ -23,7 +23,6 @@ public:
                      Variable &label) override;
     void backward() override;
     void update() override {};
-    void clearGrad() override {};
 };
 
 #endif //TINYDNN__CROSS_ENTROPY_LOSS_H

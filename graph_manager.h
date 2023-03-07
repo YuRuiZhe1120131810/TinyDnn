@@ -50,7 +50,6 @@ public:
     }
     void backward(Variable &);
     void update();
-    void clearVariable();
 };
 
 #endif //TINYDNN__GRAPH_MANAGER_H

@@ -40,7 +40,6 @@ public:
     Variable forward(Variable &input) override;
     void backward() override;
     void update() override;
-    void clearGrad() override;
 };
 
 #endif //TINYDNN__FULL_CONNECT_H

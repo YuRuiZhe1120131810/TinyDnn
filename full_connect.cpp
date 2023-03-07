@@ -41,7 +41,8 @@ Variable FullConnect::forward(Variable &input) {
     /*计算y=xw+b*/
     auto output_ = Variable(input.val() * _weight + _bias.replicate(input.rows(),
                                                                     1),
-                            _name + "_" + std::to_string(_forwardCount++));
+                            _name + "_" + std::to_string(_forwardCount++),
+                            _graphManager);
     std::cout << "layer=" << _name
               << ",x," << input.val().rows() << "行" << input.val().cols() << "列"
               << ",w," << _weight.rows() << "行" << _weight.cols() << "列"
@@ -262,17 +263,8 @@ void FullConnect::backward() {
 void FullConnect::update() {
     /*_gradWeight通过矩阵相乘得到 定义符合 ∂F/∂X = ∂Y/∂x * ∂F/∂Y  ∂F/∂X 的形状和 X 并不一定相同*/
     _weight += _gradWeight.reshaped(_weight.rows(),
-                                    _weight.cols()) * _learning_rate * -1;
+                                    _weight.cols()) * _learning_rate;
     /*bias是一个只有1行的向量 前馈时复制自身 反馈时调整形状使bias_grad的column=bias的column 最后累加成一个1行向量 */
     _bias += _gradBias.reshaped(_gradBias.rows() / _bias.cols(),
-                                _bias.cols()).colwise().sum() * _learning_rate * -1;
-}
-
-void FullConnect::clearGrad() {
-    _wGradOfOutput.clear();
-    _bGradOfOutput.clear();
-    _gradWeight.resize(0,
-                       0);
-    _gradBias.resize(0,
-                     0);
+                                _bias.cols()).colwise().sum() * _learning_rate;
 }
