@@ -38,6 +38,23 @@ void GraphManager::backward(Variable &start) {
 
 void GraphManager::update() {
     for (const auto &pair: _operators) {
-        pair.second->update();/*每个op都是初始化状态，相应的梯度和参数没有记录到_operators中*/
+        pair.second->update();
+        pair.second->clearGrad();
     }
+}
+
+void GraphManager::clearVariable() {
+    _variableCallBy.clear();
+    _variableCreateBy.clear();
+//    _variables.clear();/*直接释放会报错*/
+    std::string var_name;
+    var_name = "train_data";
+    var_name = "train_label";
+    var_name = "FullConnect_0_0";
+    var_name = "CrossEntropy_0_0";
+    var_name = "FullConnect_1_0";
+    _variables.at(var_name)->~Variable();
+    std::cout << "var:" << var_name << " reference count=" << _variables.at(var_name).use_count()
+              << std::endl;
+    _variables.erase(var_name);
 }

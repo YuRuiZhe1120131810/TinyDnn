@@ -13,12 +13,13 @@
 class GraphManager;
 
 Variable::Variable(const Eigen::MatrixXd &m,
-                   std::string name,
-                   GraphManager &graph_manager) : _name(std::move(name)) {
-    reset();
+                   std::string name) : _name(std::move(name)) {
+    _gradientOfLoss.resize(0,
+                           0);
+    _gradientOfOperator.clear();
     _value = m;
-    graph_manager._variables.emplace(_name,
-                                     std::shared_ptr<Variable>(this));
+    GraphManager::get()._variables.emplace(_name,
+                                           std::shared_ptr<Variable>(this));
 }
 
 Variable::Variable(Variable &&other) noexcept {
@@ -28,19 +29,9 @@ Variable::Variable(Variable &&other) noexcept {
               other._gradientOfLoss);
     std::swap(_gradientOfOperator,
               other._gradientOfOperator);
-    other.reset();
-}
-
-Variable::~Variable() {
-    reset();
-}
-
-void Variable::reset() {
-    _value.resize(0,
-                  0);
-    _gradientOfLoss.resize(0,
-                           0);
-    _gradientOfOperator.clear();
+    /*GraphManager 会把 Variable 的地址记录一份 移动构造后右值引用变量自动释放 防止指针悬空需要重新记录 Variable 地址*/
+    GraphManager::get()._variables.at(other._name) = std::shared_ptr<Variable>(this);
+    other.~Variable();
 }
 
 Variable &Variable::operator=(Variable &&other) noexcept {
@@ -51,9 +42,23 @@ Variable &Variable::operator=(Variable &&other) noexcept {
                   other._gradientOfLoss);
         std::swap(_gradientOfOperator,
                   other._gradientOfOperator);
-        other.reset();
+        /*GraphManager 会把 Variable 的地址记录一份 当移动赋值后右值引用变量自动释放 防止指针悬空需要重新记录 Variable 地址*/
+        GraphManager::get()._variables.at(other._name) = std::shared_ptr<Variable>(this);
+        other.~Variable();
     }
     return *this;
+}
+
+Variable::~Variable() {
+    _value.resize(0,
+                  0);
+    _gradientOfLoss.resize(0,
+                           0);
+    for (auto &pair:_gradientOfOperator) {
+        pair.second.resize(0,
+                           0);
+    }
+    _gradientOfOperator.clear();
 }
 
 uint32_t Variable::rows() const {

@@ -36,6 +36,7 @@ public:
     virtual void backward();
     /*更新参数 载入参数 保存参数 初始化参数 如果layer没有参数可以不操作*/
     virtual void update();
+    virtual void clearGrad();
     virtual bool loadWeight();
     virtual bool saveWeight();
     virtual void initWeight(uint64_t seed);
