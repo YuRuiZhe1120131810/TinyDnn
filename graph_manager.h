@@ -26,9 +26,11 @@ class GraphManager {
 private:
 
 public:
+    /*存储栈上自动变量的指针 要注意自动变量的生命周期 防止对悬空指针解引用*/
     std::unordered_map<std::string, OperatorBase *> _operators;
     std::unordered_map<std::string, std::vector<std::string>> _variableCallBy;
     std::unordered_map<std::string, std::string> _variableCreateBy;
+    /*存储栈上自动变量的指针 要注意自动变量的生命周期 防止对悬空指针解引用*/
     std::unordered_map<std::string, Variable *> _variables;
     ~GraphManager() {
         _operators.clear();
@@ -48,8 +50,8 @@ public:
         _variableCreateBy.clear();
         _variables.clear();
     }
-    void backward(Variable &);
-    void update();
+    void backward(Variable &) const;
+    void update() const;
 };
 
 #endif //TINYDNN__GRAPH_MANAGER_H

@@ -15,8 +15,10 @@ class GraphManager;
 Variable::Variable(const Eigen::MatrixXd &m,
                    std::string name,
                    GraphManager &graph_manager) : _name(std::move(name)) {
-    reset();
     _value = m;
+    _gradientOfLoss.resize(0,
+                           0);
+    _gradientOfOperator.clear();
     graph_manager._variables.emplace(_name,
                                      this);
 }
@@ -28,14 +30,10 @@ Variable::Variable(Variable &&other) noexcept {
               other._gradientOfLoss);
     std::swap(_gradientOfOperator,
               other._gradientOfOperator);
-    other.reset();
+    other.~Variable();
 }
 
 Variable::~Variable() {
-    reset();
-}
-
-void Variable::reset() {
     _value.resize(0,
                   0);
     _gradientOfLoss.resize(0,
@@ -51,7 +49,7 @@ Variable &Variable::operator=(Variable &&other) noexcept {
                   other._gradientOfLoss);
         std::swap(_gradientOfOperator,
                   other._gradientOfOperator);
-        other.reset();
+        other.~Variable();
     }
     return *this;
 }

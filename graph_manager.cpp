@@ -13,7 +13,7 @@
 #include <list>
 #include <iostream>
 
-void GraphManager::backward(Variable &start) {
+void GraphManager::backward(Variable &start) const {
     /*从loss节点开始BFS遍历 要求graph是树形结构 把loss节点的梯度回传给所有Operator和Variable*/
     std::queue<std::string> fifo_;
     fifo_.emplace(start._name);
@@ -36,8 +36,8 @@ void GraphManager::backward(Variable &start) {
     }
 }
 
-void GraphManager::update() {
+void GraphManager::update() const {
     for (const auto &pair: _operators) {
-        pair.second->update();/*每个op都是初始化状态，相应的梯度和参数没有记录到_operators中*/
+        pair.second->update();
     }
 }
