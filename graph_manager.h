@@ -26,10 +26,10 @@ class GraphManager {
 private:
 
 public:
-    std::unordered_map<std::string, std::shared_ptr<OperatorBase>> _operators;
+    std::unordered_map<std::string, OperatorBase *> _operators;
     std::unordered_map<std::string, std::vector<std::string>> _variableCallBy;
     std::unordered_map<std::string, std::string> _variableCreateBy;
-    std::unordered_map<std::string, std::shared_ptr<Variable>> _variables;
+    std::unordered_map<std::string, Variable *> _variables;
     ~GraphManager() {
         _operators.clear();
         _variableCallBy.clear();

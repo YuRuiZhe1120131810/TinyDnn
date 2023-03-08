@@ -33,7 +33,7 @@ FullConnect::FullConnect(uint64_t in_channel,
                                                         OperatorBase(graph_manager) {
     _name = std::string("FullConnect_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
     _graphManager._operators.emplace(_name,
-                                     std::shared_ptr<FullConnect>(this));
+                                     this);
 }
 
 Variable FullConnect::forward(Variable &input) {

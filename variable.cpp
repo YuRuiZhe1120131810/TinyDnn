@@ -18,7 +18,7 @@ Variable::Variable(const Eigen::MatrixXd &m,
     reset();
     _value = m;
     graph_manager._variables.emplace(_name,
-                                     std::shared_ptr<Variable>(this));
+                                     this);
 }
 
 Variable::Variable(Variable &&other) noexcept {

@@ -21,7 +21,7 @@ CrossEntropyLoss::CrossEntropyLoss(GraphManager &graph_manager) : _forwardCount(
                                                                   OperatorBase(graph_manager) {
     _name = std::string("CrossEntropy_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
     _graphManager._operators.emplace(_name,
-                                     std::shared_ptr<CrossEntropyLoss>(this));
+                                     this);
 }
 
 Variable CrossEntropyLoss::forward(Variable &prediction,

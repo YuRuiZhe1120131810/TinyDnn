@@ -26,7 +26,7 @@ void GraphManager::backward(Variable &start) {
             continue;
         }
         std::cout << "由Operator=" << iter->second << "生成" << std::endl;
-        std::shared_ptr<OperatorBase> &invoke_op_ = _operators.at(iter->second);
+        OperatorBase *invoke_op_ = _operators.at(iter->second);
         invoke_op_->backward();
         for (const auto &io_var_name_ :invoke_op_->_inputOutputPair) {
             fifo_.emplace(io_var_name_.first);
