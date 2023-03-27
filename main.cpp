@@ -62,9 +62,6 @@ int main(int argc,
     CrossEntropyLoss layer_2_(GraphManager::get());
     for (struct { double _oprimalLoss{INFINITY};bool _runFlag{true}; uint64_t _cnt{0}; } condition_;
          condition_._runFlag; ++condition_._cnt) {
-        if (fit_success_[condition_._cnt % data_cnt_]) {
-            continue;
-        }
         /*随机采样一个训练样本和拟合目标*/
         const Eigen::MatrixXd pts_single_ = pts_.block(condition_._cnt % data_cnt_,
                                                        0,
