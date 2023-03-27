@@ -27,13 +27,14 @@ FullConnect::FullConnect(uint64_t in_channel,
                                                         _learning_rate(learning_rate),
                                                         _forwardCount(0),
                                                         _weight(Eigen::MatrixXd::Ones(in_channel,
-                                                                                      out_channel) * 0.1),
+                                                                                      out_channel)),
                                                         _bias(Eigen::MatrixXd::Ones(1,
-                                                                                    out_channel) * 0.1),
+                                                                                    out_channel)),
                                                         OperatorBase(graph_manager) {
     _name = std::string("FullConnect_").append(std::to_string(_instanceCount++));/*构造实例计数增一*/
     _graphManager._operators.emplace(_name,
                                      this);
+    initWeight(0);
 }
 
 Variable FullConnect::forward(Variable &input) {
@@ -43,11 +44,6 @@ Variable FullConnect::forward(Variable &input) {
                                                                     1),
                             _name + "_" + std::to_string(_forwardCount++),
                             _graphManager);
-    std::cout << "layer=" << _name
-              << ",x," << input.val().rows() << "行" << input.val().cols() << "列"
-              << ",w," << _weight.rows() << "行" << _weight.cols() << "列"
-              << ",b," << _bias.rows() << "行" << _bias.cols() << "列"
-              << ",y," << output_.val().rows() << "行" << output_.val().cols() << "列" << std::endl;
     /*填充节点连接关系*/
     _graphManager._variableCreateBy.emplace(output_._name,
                                             _name);
@@ -57,16 +53,18 @@ Variable FullConnect::forward(Variable &input) {
     /*y对w的梯度*/
     Eigen::MatrixXd identity_ = Eigen::MatrixXd::Identity(_weight.cols(),
                                                           _weight.cols());
-    Eigen::MatrixXd grad_w_ = kroneckerProduct(input.val().transpose(),
-                                               identity_).eval();
-    std::cout << "layer=" << _name << ",y对w的梯度" << grad_w_.rows() << "行" << grad_w_.cols() << "列" << std::endl;
+    Eigen::MatrixXd grad_w_ = kroneckerProduct(identity_,
+                                               input.val().transpose()).eval();
     /*y对x的梯度*/
     identity_ = Eigen::MatrixXd::Identity(input.rows(),
                                           input.rows());
-    Eigen::MatrixXd grad_input_ = kroneckerProduct(identity_,
-                                                   _weight).eval();
-    std::cout << "layer=" << _name << ",y对x的梯度" << grad_input_.rows() << "行" << grad_input_.cols() << "列" << std::endl;
+    Eigen::MatrixXd grad_input_ = kroneckerProduct(_weight,
+                                                   identity_).eval();
     /*y对bias的梯度恒为1 但是随着input的行数变化 bias的梯度的行数也在变化 可能需要把梯度累加到一行 导致梯度更新不准*/
+    Eigen::MatrixXd grad_bias_ = kroneckerProduct(Eigen::MatrixXd::Identity(_bias.cols(),
+                                                                            _bias.cols()),
+                                                  Eigen::MatrixXd::Identity(input.rows(),
+                                                                            input.rows())).eval();
     auto sigmoid = [&](const Eigen::MatrixXd &x)->Eigen::MatrixXd { return 1 / ((-x).array().exp() + 1); };
     /*激活函数*/
     if (_act_func == "relu") {
@@ -76,18 +74,12 @@ Variable FullConnect::forward(Variable &input) {
         Eigen::MatrixXd to_diag_ = Eigen::VectorXd::Map(output_._value.data(),
                                                         output_._value.size()).asDiagonal();
         Eigen::MatrixXd grad_relu_ = to_diag_.array().sign();
-        std::cout << "layer=" << _name << ",relu对y的梯度" << grad_relu_.rows() << "行" << grad_relu_.cols() << "列"
-                  << std::endl;
         /*z对w的梯度 = y对w的梯度 * z对y的梯度*/
         _wGradOfOutput.emplace(output_._name,
                                grad_w_ * grad_relu_);
-        std::cout << "layer=" << _name << ",relu对w的梯度" << _wGradOfOutput[output_._name].rows() << "行"
-                  << _wGradOfOutput[output_._name].cols() << "列" << std::endl;
         /*z对bias的梯度 = y对bias的梯度 * z对y的梯度*/
         _bGradOfOutput.emplace(output_._name,
-                               grad_relu_);
-        std::cout << "layer=" << _name << ",relu对bias的梯度" << _bGradOfOutput[output_._name].rows() << "行"
-                  << _bGradOfOutput[output_._name].cols() << "列" << std::endl;
+                               grad_bias_ * grad_relu_);
         /*z对x的梯度 = y对x的梯度 * z对y的梯度*/
         auto has_ = input._gradientOfOperator.find(_name);
         if (has_ == input._gradientOfOperator.end()) {
@@ -97,8 +89,6 @@ Variable FullConnect::forward(Variable &input) {
         else {
             has_->second += grad_input_ * grad_relu_;/*如果一个Variable被同一layer多次前馈 梯度应该累加*/
         }
-        std::cout << "layer=" << _name << ",relu对x的梯度" << input._gradientOfOperator[_name].rows() << "行"
-                  << input._gradientOfOperator[_name].cols() << "列" << std::endl;
     }
     else if (_act_func == "softmax") {
         /*softmax不是逐元素函数 是逐行函数 每一行之间的计算结果是完全独立的*/
@@ -141,13 +131,13 @@ Variable FullConnect::forward(Variable &input) {
                                     blk_.cols()) = blk_;
             }
         }
-        grad_softmax_ = grad_softmax_.transpose().eval();/*需要转置*/
+        //grad_softmax_ = grad_softmax_.transpose().eval();/*需要转置*/
         /*z对w的梯度 = y对w的梯度 * z对y的梯度*/
         _wGradOfOutput.emplace(output_._name,
                                grad_w_ * grad_softmax_);
         /*z对bias的梯度 = y对bias的梯度 * z对y的梯度*/
         _bGradOfOutput.emplace(output_._name,
-                               grad_softmax_);
+                               grad_bias_ * grad_softmax_);
         /*z对x的梯度 = y对x的梯度 * z对y的梯度*/
         auto has_ = input._gradientOfOperator.find(_name);
         if (has_ == input._gradientOfOperator.end()) {
@@ -170,7 +160,7 @@ Variable FullConnect::forward(Variable &input) {
                                grad_w_ * grad_sigmoid_);
         /*z对bias的梯度 = y对bias的梯度 * z对y的梯度*/
         _bGradOfOutput.emplace(output_._name,
-                               grad_sigmoid_);
+                               grad_bias_ * grad_sigmoid_);
         /*z对x的梯度 = y对x的梯度 * z对y的梯度*/
         auto has_ = input._gradientOfOperator.find(_name);
         if (has_ == input._gradientOfOperator.end()) {
@@ -193,7 +183,7 @@ Variable FullConnect::forward(Variable &input) {
                                grad_w_ * grad_tanh_);
         /*z对bias的梯度 = y对bias的梯度 * z对y的梯度*/
         _bGradOfOutput.emplace(output_._name,
-                               grad_tanh_);
+                               grad_bias_ * grad_tanh_);
         /*z对x的梯度 = y对x的梯度 * z对y的梯度*/
         auto has_ = input._gradientOfOperator.find(_name);
         if (has_ == input._gradientOfOperator.end()) {
@@ -211,8 +201,7 @@ Variable FullConnect::forward(Variable &input) {
                                grad_w_);
         /*z对bias的梯度 = y对bias的梯度*/
         _bGradOfOutput.emplace(output_._name,
-                               Eigen::MatrixXd::Identity(output_.rows() * output_.cols(),
-                                                         output_.rows() * output_.cols()));
+                               grad_bias_);
         /*z对x的梯度 = y对x的梯度*/
         auto has_ = input._gradientOfOperator.find(_name);
         if (has_ == input._gradientOfOperator.end()) {
@@ -263,8 +252,24 @@ void FullConnect::backward() {
 void FullConnect::update() {
     /*_gradWeight通过矩阵相乘得到 定义符合 ∂F/∂X = ∂Y/∂x * ∂F/∂Y  ∂F/∂X 的形状和 X 并不一定相同*/
     _weight += _gradWeight.reshaped(_weight.rows(),
-                                    _weight.cols()) * _learning_rate;
+                                    _weight.cols()) * _learning_rate * -1;
     /*bias是一个只有1行的向量 前馈时复制自身 反馈时调整形状使bias_grad的column=bias的column 最后累加成一个1行向量 */
     _bias += _gradBias.reshaped(_gradBias.rows() / _bias.cols(),
-                                _bias.cols()).colwise().sum() * _learning_rate;
+                                _bias.cols()).colwise().sum() * _learning_rate * -1;
+    _wGradOfOutput.clear();
+    _bGradOfOutput.clear();
+}
+
+void FullConnect::initWeight(uint64_t seed) {
+    std::vector<double> tmp_;
+    tmp_.reserve(_weight.rows() * _weight.cols());
+    for (long i_{0}; i_ < _weight.rows() * _weight.cols(); ++i_) {
+        tmp_.emplace_back(0.1 * i_ + 0.1);
+    }
+    _weight = Eigen::MatrixXd::Map(&tmp_[0],
+                                   _weight.rows(),
+                                   _weight.cols());
+    _bias = Eigen::MatrixXd::Map(&tmp_[0],
+                                 _bias.rows(),
+                                 _bias.cols());
 }

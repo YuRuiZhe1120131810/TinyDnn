@@ -40,6 +40,7 @@ public:
     Variable forward(Variable &input) override;
     void backward() override;
     void update() override;
+    void initWeight(uint64_t seed) override;
 };
 
 #endif //TINYDNN__FULL_CONNECT_H

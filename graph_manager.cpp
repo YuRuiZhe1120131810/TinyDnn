@@ -18,20 +18,15 @@ void GraphManager::backward(Variable &start) const {
     std::queue<std::string> fifo_;
     fifo_.emplace(start._name);
     while (!fifo_.empty()) {
-        std::cout << "当前Variable=" << fifo_.front();
         const auto &iter = _variableCreateBy.find(fifo_.front());
         fifo_.pop();
         if (iter == _variableCreateBy.end()) {
-            std::cout << "是叶子节点,continue" << std::endl;
             continue;
         }
-        std::cout << "由Operator=" << iter->second << "生成" << std::endl;
         OperatorBase *invoke_op_ = _operators.at(iter->second);
         invoke_op_->backward();
         for (const auto &io_var_name_ :invoke_op_->_inputOutputPair) {
             fifo_.emplace(io_var_name_.first);
-            std::cout << "Operator=" << invoke_op_->_name
-                      << "的输入Variable=" << io_var_name_.first << std::endl;
         }
     }
 }
@@ -39,5 +34,14 @@ void GraphManager::backward(Variable &start) const {
 void GraphManager::update() const {
     for (const auto &pair: _operators) {
         pair.second->update();
+    }
+}
+
+void GraphManager::release() {
+    _variableCallBy.clear();
+    _variables.clear();
+    _variableCreateBy.clear();
+    for (auto &pair:_operators) {
+        pair.second->release();
     }
 }

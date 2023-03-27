@@ -15,6 +15,9 @@ OperatorBase::OperatorBase(GraphManager &gm) : _graphManager{gm} {
 OperatorBase::~OperatorBase() {
     _inputOutputPair.clear();
 }
+void OperatorBase::release() {
+    _inputOutputPair.clear();
+}
 Variable OperatorBase::forward(Variable &v) {
     assert(false && "operator_base not inplement");
 }

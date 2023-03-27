@@ -52,6 +52,7 @@ public:
     }
     void backward(Variable &) const;
     void update() const;
+    void release();
 };
 
 #endif //TINYDNN__GRAPH_MANAGER_H
