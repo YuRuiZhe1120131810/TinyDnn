@@ -216,8 +216,7 @@ Variable FullConnect::forward(Variable &input) {
 }
 
 void FullConnect::backward() {
-    for (const auto &ele :_inputOutputPair) {
-        const auto &output_name_{ele.second};
+    for (const auto &[input_name_, output_name_] :_inputOutputPair) {
         /*loss对z的梯度*/
         const auto &grad_loss_to_output_{_graphManager._variables.at(output_name_)->_gradientOfLoss};
         /*loss对w的梯度 = z对w的梯度 * loss对z的梯度*/
@@ -237,7 +236,6 @@ void FullConnect::backward() {
             _gradBias += tmp_;
         }
         /*loss对x的梯度 = z对x的梯度 * loss对z的梯度*/
-        const auto &input_name_{ele.first};
         tmp_ = _graphManager._variables.at(input_name_)->_gradientOfOperator.at(_name) * grad_loss_to_output_;
         auto &grad_loss_to_input_ = _graphManager._variables.at(input_name_)->_gradientOfLoss;
         if (grad_loss_to_input_.size() == 0) {
@@ -261,15 +259,20 @@ void FullConnect::update() {
 }
 
 void FullConnect::initWeight(uint64_t seed) {
-    std::vector<double> tmp_;
-    tmp_.reserve(_weight.rows() * _weight.cols());
+    srand(seed);
+    std::vector<double> weight_tmp_, bias_tmp_;
+    weight_tmp_.reserve(_weight.rows() * _weight.cols());
     for (long i_{0}; i_ < _weight.rows() * _weight.cols(); ++i_) {
-        tmp_.emplace_back(0.1 * i_ + 0.1);
+        weight_tmp_.emplace_back(rand() % 10 / 100.0);
     }
-    _weight = Eigen::MatrixXd::Map(&tmp_[0],
+    _weight = Eigen::MatrixXd::Map(&weight_tmp_[0],
                                    _weight.rows(),
                                    _weight.cols());
-    _bias = Eigen::MatrixXd::Map(&tmp_[0],
+    bias_tmp_.reserve(_bias.rows() * _bias.cols());
+    for (long i_{0}; i_ < _bias.rows() * _bias.cols(); ++i_) {
+        bias_tmp_.emplace_back(rand() % 10 / 100.0);
+    }
+    _bias = Eigen::MatrixXd::Map(&bias_tmp_[0],
                                  _bias.rows(),
                                  _bias.cols());
 }

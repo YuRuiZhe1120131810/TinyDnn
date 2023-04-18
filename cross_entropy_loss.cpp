@@ -26,11 +26,11 @@ CrossEntropyLoss::CrossEntropyLoss(GraphManager &graph_manager) : _forwardCount(
 
 Variable CrossEntropyLoss::forward(Variable &prediction,
                                    Variable &label) {
-    assert(prediction.cols() == label.cols() && prediction.rows() == label.rows());
-    assert(0 < prediction._value.minCoeff() && prediction._value.maxCoeff() <= 1 && 0 <= label._value.minCoeff()
-               && label._value.maxCoeff() <= 1);
+    assert(prediction.cols() == label.cols() && prediction.rows() == label.rows()
+               && 0 < prediction._value.minCoeff() && prediction._value.maxCoeff() < 1
+               && 0 <= label._value.minCoeff() && label._value.maxCoeff() <= 1);
     /*计算loss=sum[-label*ln(prediction)]*/
-    const double result_ = (-label._value.array() * prediction._value.array().log()).sum();
+    const double result_ = -(label._value.array() * prediction._value.array().log()).sum();
     auto output_ = Variable(Eigen::Matrix<double, 1, 1>(result_),
                             _name + "_" + std::to_string(_forwardCount++),
                             _graphManager);
@@ -61,9 +61,8 @@ Variable CrossEntropyLoss::forward(Variable &prediction,
 }
 
 void CrossEntropyLoss::backward() {
-    for (const auto &ele :_inputOutputPair) {
+    for (const auto &[input_name_, output_name_] :_inputOutputPair) {
         /*loss对x的梯度 = z对x的梯度 * loss对z的梯度*/
-        const std::string &input_name_{ele.first}, &output_name_{ele.second};
         Variable &layer_input_ = *_graphManager._variables.at(input_name_);
         Variable &layer_output_ = *_graphManager._variables.at(output_name_);
         const auto &grad_loss_to_output_{layer_output_._gradientOfLoss};
